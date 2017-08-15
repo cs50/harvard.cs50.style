@@ -1,0 +1,21 @@
+{
+  "name": "style50",
+  "description": "",
+  "version": "0.1.0",
+  "author": "CS50",
+  "contributors": [
+    {
+      "name": "Will Claybaugh",
+      "email": "wclaybaugh@g.harvard.edu"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "plugins": {
+    "style50": {}
+  },
+  "categories": ["miscellaneous"],
+  "licenses": []
+}
