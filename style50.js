@@ -171,8 +171,16 @@ define(function(require, exports, module) {
         style50_panel.on("load", function() {
             load();
         });
+        
         style50_panel.on("unload", function() {
             
+        });
+        
+        style50_panel.on("show", function() {
+            emit("draw",{
+                aml:style50_panel.aml,
+                html:style50_panel.aml.$int
+            });
         });
         
         //draw the panel by getting focused file's path/extension and calling the draw helper
@@ -182,6 +190,12 @@ define(function(require, exports, module) {
             // }
             var cur_tab = tabManager.focussedTab;
             
+            //if no tabs are open
+            if (!cur_tab){
+                return;
+            }
+            
+            //if the tab is a terminal, preferences page, or other item without a filepath
             var filepath = cur_tab.path;
             if (!filepath){
                 return;
