@@ -1,24 +1,24 @@
 define(function(require, exports, module) {
     main.consumes = [
-        "Panel", "c9", "panels","ui","layout","proc","ace","tabManager","save","settings"
+        "Panel","proc","save","settings","tabManager","ui"
     ];
-    main.provides = ["style50"];
+    main.provides = ["harvard.cs50.style"];
     return main;
 
     function main(options, imports, register) {
         var Panel = imports.Panel;
-        var ui = imports.ui;
         var proc = imports.proc;
-        var tabManager = imports.tabManager;
         var save = imports.save;
         var settings = imports.settings;
+        var tabManager = imports.tabManager;
+        var ui = imports.ui;
         
         /***** Initialization *****/
         var style50_panel = new Panel("style50", main.consumes, {
-            index    : 100, //order in the vertical bar
-            width    : 250, //window width when open
-            caption  : "Style50", //name in the vertical bar
-            minWidth : 200,  //??
+            index    : 100, // order in the vertical bar
+            width    : 250, // window width when open
+            caption  : "Style50", // name in the vertical bar
+            minWidth : 200,  // ?? doesn't seem to be enforced
             where    : "right"
         });
         
@@ -26,11 +26,6 @@ define(function(require, exports, module) {
         
         //runs when c9 is started/package is loaded
         function load() {
-            // style50_panel.setCommand({
-            //     name    : "coolpanel",
-            //     hint    : "being cool",
-            //     bindKey : { mac: "Command-H", win: "Ctrl-H" }
-            // });
             
             /////
             // Set styling for the plugin via CSS
@@ -43,8 +38,8 @@ define(function(require, exports, module) {
             , options.staticPrefix, style50_panel);
             
             //match plugin's code display to IDE's code display
-            var font_family=settings.get("user/ace/@fontFamily");
-            var font_text=set_font(settings.get("user/ace/@fontSize"));
+            var font_family = settings.get("user/ace/@fontFamily");
+            var font_text = settings.get("user/ace/@fontSize") + "px";
             ui.insertCss("#style50 {\
                 font-family:" + font_family + ";\
                 font-size:" + font_text +";\
@@ -83,7 +78,10 @@ define(function(require, exports, module) {
                     if (!style50_panel.active){
                         return;
                     }
-                    emit("draw",{aml:style50_panel.aml,html:style50_panel.aml.$int});
+                    emit("draw",{
+                        aml:style50_panel.aml,
+                        html:style50_panel.aml.$int
+                    });
                 },style50_panel);
             });
             
@@ -93,22 +91,22 @@ define(function(require, exports, module) {
             },style50_panel);
             
             //update our font size and shape when those settings change
-            settings.on("user/ace/@fontSize",function(e){
-                var font_text=settings.get("user/ace/@fontSize")+"px";
+            settings.on("user/ace/@fontSize",function(new_size){
+                var font_text = new_size + "px";
                 ui.setStyleRule("#style50","font-size",font_text);
             },style50_panel);
             
-            settings.on("user/ace/@fontFamily",function(e){
-                var font_family=settings.get("user/ace/@fontFamily");
-                ui.setStyleRule("#style50","font-family",font_family);
+            settings.on("user/ace/@fontFamily",function(new_family_text){
+                ui.setStyleRule("#style50","font-family",new_family_text);
             },style50_panel);
         }
         
         /***** Methods and Helper Functions*****/
+        
         //helper to run the style50 command line tool and render output
-        draw_pane=function(e,filepath){
+        draw_pane = function(e,filepath){
             //clear the window
-            e.html.innerHTML="";
+            e.html.innerHTML = "";
             
             //run the CLI and handle results
             proc.spawn(
@@ -129,42 +127,43 @@ define(function(require, exports, module) {
                     process.stdout.on("data", function(chunk) {
                         
                         //unpack the JSON output
-                        var style50_dict=JSON.parse(chunk);
+                        var style50_dict = JSON.parse(chunk);
                         if (!style50_dict[filepath]){
                             draw_error(e);
                             return;
                         }
-                        var diff_html=style50_dict[filepath].diff;
-                        var percent_score=style50_dict[filepath].score;
+                        
+                        var diff_html = style50_dict[filepath].diff;
+                        var percent_score = style50_dict[filepath].score;
                         
                         //if code style is perfect, congratualte the user and quit
-                        if (percent_score===1){
-                            e.html.innerHTML="<div id='style50_perfect'>"+ "<br>"+ "Your code is styled beautifully!!" +"</div>";
+                        if (percent_score === 1){
+                            e.html.innerHTML = "<div id = 'style50_perfect'>" + "<br>" + "Your code is styled beautifully!!" + "</div>";
                             return;
                         }
                         
                         //Otherwise, give info on the number of incorrect lines and display the diff
-                        var line_array=diff_html.split("\n");
-                        var nonempty_insert=/<ins>.+<\/ins>/;
-                        var nonempty_delete=/<del>.+<\/del>/;
-                        var bad_line_count=line_array.reduce(function(count,cur_line){
+                        var line_array = diff_html.split("\n");
+                        var nonempty_insert = /<ins>.+<\/ins>/;
+                        var nonempty_delete = /<del>.+<\/del>/;
+                        var bad_line_count = line_array.reduce(function(count,cur_line){
                             return count + (nonempty_insert.test(cur_line) || nonempty_delete.test(cur_line));
                         },0);
                         
-                        score_html="<div>You have " + bad_line_count + " lines styled incorrectly";
+                        score_html = "<div>You have " + bad_line_count + " lines styled incorrectly";
                         
-                        e.html.innerHTML="<div id='style50'>"+ score_html + diff_html +"</div>";
+                        e.html.innerHTML = "<div id = 'style50'>" + score_html + diff_html + "</div>";
                     });
                 }
             );
         };
         
         //helpers to diplay an error message
-        draw_unsupported_error=function(e){
-            e.html.innerHTML="<div id='style50_error'>"+"Style50 does not support this file type"+"</div>";
+        draw_unsupported_error = function(e){
+            e.html.innerHTML = "<div id = 'style50_error'>" + "Style50 does not support this file type" + "</div>";
         };
-        draw_error=function(e){
-            e.html.innerHTML="<div id='style50_error'>"+"Style50 encountered an error";+"</div>";
+        draw_error = function(e){
+            e.html.innerHTML = "<div id = 'style50_error'>" + "Style50 encountered an error" + "</div>";
         };
         
         /***** Lifecycle *****/
@@ -181,15 +180,16 @@ define(function(require, exports, module) {
             // if (!style50_panel.active){
             //     return;
             // }
-            var cur_tab=tabManager.focussedTab;
+            var cur_tab = tabManager.focussedTab;
             
-            var filepath=cur_tab.path;
+            var filepath = cur_tab.path;
             if (!filepath){
                 return;
             }
-            var fullpath="/home/ubuntu/workspace"+filepath;
             
-            var extention=filepath.split('.').pop();
+            var fullpath = "/home/ubuntu/workspace" + filepath;
+            
+            var extention = filepath.split('.').pop();
             if (extention !== "c" && extention !== "js" && extention !== "py" && extention !== "cpp" && extention !== "java"){
                 draw_unsupported_error(e);
                 return;
@@ -204,7 +204,7 @@ define(function(require, exports, module) {
         });
         
         register(null, {
-            "style50": style50_panel
+            "harvard.cs50.style": style50_panel
         });
     }
 });
