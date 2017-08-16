@@ -30,49 +30,19 @@ define(function(require, exports, module) {
             /////
             // Set styling for the plugin via CSS
             /////
-            
-            //color scheme for the insertions and deletions
-            ui.insertCss("\
-                del {background-color: OrangeRed;  text-decoration: none;}\
-                ins {background-color: SpringGreen; text-decoration: none;}"
-            , options.staticPrefix, style50_panel);
+            ui.insertCss(require("text!./style50.css"), options.staticPrefix, style50_panel);
             
             //match plugin's code display to IDE's code display
             var font_family = settings.get("user/ace/@fontFamily");
             var font_text = settings.get("user/ace/@fontSize") + "px";
-            ui.insertCss("#style50 {\
-                font-family:" + font_family + ";\
-                font-size:" + font_text +";\
-            }", options.staticPrefix, style50_panel);
-            
-            //enable scrolling and disable selection (and thus copy/paste) for the plugin
-            ui.insertCss("#style50 {\
-                overflow-y: scroll; height: 100%;\
-                user-select: none;\
-                -ms-user-select: none;\
-                -moz-user-select: none;\
-                -webkit-user-select: none;\
-                -webkit-touch-callout: none;\
-            }", options.staticPrefix, style50_panel);
-            
-            //styling for the success/perfect score message
-            ui.insertCss("#style50_perfect {\
-                text-align: center;\
-                padding: 70px 0;\
-            }", options.staticPrefix, style50_panel);
-            
-            //styling for the error messages
-            ui.insertCss("#style50_error {\
-                text-align: center;\
-                padding: 70px 0;\
-            }", options.staticPrefix, style50_panel);
-            
+            ui.setStyleRule("#style50","font-family",font_family);
+            ui.setStyleRule("#style50","font-size",font_text);
             
             /////
             // Set event handlers
             /////
             
-            //all open tabs should talk when given focus
+            //all open tabs should talk to us when given focus
             tabManager.once("ready", function() {
                 tabManager.on("focus",function(e){
                     if (!style50_panel.active){

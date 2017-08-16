@@ -1,0 +1,26 @@
+del {background-color: OrangeRed;  text-decoration: none;}
+ins {background-color: SpringGreen; text-decoration: none;}
+
+style50 {
+    font-family:" + font_family + ";
+    font-size: 13;
+}
+            
+style50 {
+    overflow-y: scroll; height: 100%;
+    user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+#style50_perfect {
+    text-align: center;
+    padding: 70px 0;
+}
+
+#style50_error {
+    text-align: center;
+    padding: 70px 0;
+}
