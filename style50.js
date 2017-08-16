@@ -95,12 +95,12 @@ define(function(require, exports, module) {
             //update our font size and shape when the setting changes
             settings.on("user/ace/@fontSize",function(e){
                 font_text=set_font(settings.get("user/ace/@fontSize"));
-                ui.insertCss("#style50 {font-size:" + font_text +";}", options.staticPrefix, style50_panel);
+                ui.setStyleRule("#style50","font-size",font_text);
             },style50_panel);
             
             settings.on("user/ace/@fontFamily",function(e){
-                font_family=set_font(settings.get("user/ace/@fontSize"));
-                ui.insertCss("#style50 {font-size:" + font_family +";}", options.staticPrefix, style50_panel);
+                font_family=settings.get("user/ace/@fontFamily");
+                ui.setStyleRule("#style50","font-family",font_family);
             },style50_panel);
         }
         
