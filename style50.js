@@ -67,10 +67,10 @@ define(function(require, exports, module) {
             }", options.staticPrefix, style50_panel);
             
             //styling for the error messages
-            ui.insertCss("\
-                #style50_error {text-align: center;\
-                                 padding: 70px 0;\
-                }", options.staticPrefix, style50_panel);
+            ui.insertCss("#style50_error {\
+                text-align: center;\
+                padding: 70px 0;\
+            }", options.staticPrefix, style50_panel);
             
             
             /////
@@ -92,14 +92,14 @@ define(function(require, exports, module) {
                 emit("draw",{aml:style50_panel.aml,html:style50_panel.aml.$int});
             },style50_panel);
             
-            //update our font size and shape when the setting changes
+            //update our font size and shape when those settings change
             settings.on("user/ace/@fontSize",function(e){
-                font_text=set_font(settings.get("user/ace/@fontSize"));
+                var font_text=settings.get("user/ace/@fontSize")+"px";
                 ui.setStyleRule("#style50","font-size",font_text);
             },style50_panel);
             
             settings.on("user/ace/@fontFamily",function(e){
-                font_family=settings.get("user/ace/@fontFamily");
+                var font_family=settings.get("user/ace/@fontFamily");
                 ui.setStyleRule("#style50","font-family",font_family);
             },style50_panel);
         }
@@ -165,12 +165,6 @@ define(function(require, exports, module) {
         };
         draw_error=function(e){
             e.html.innerHTML="<div id='style50_error'>"+"Style50 encountered an error";+"</div>";
-        };
-        
-        //sets mapping between c9's listed font size and the CSS font attribute
-        set_font=function(font_size){
-            percent=7*(font_size-12)+100;
-            return ""+percent+"%";
         };
         
         /***** Lifecycle *****/
