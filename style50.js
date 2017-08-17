@@ -85,19 +85,36 @@ define(function(require, exports, module) {
                 function(err, process) {
                     if (err) throw err;
                     
-                    //if the CL tool errors
+                    var error_accumulation=[];
+                    var out_accumulation=[];
+                    
+                    // accumulate responses utill the stream ends
+                    process.stdout.on("data", function(chunk) {
+                        out_accumulation.push(chunk);
+                    });
+                    
                     process.stderr.on("data",function(chunk){
-                        console.log("error in style50:");
-                        console.log(chunk);
+                        error_accumulation.push(chunk);
+                    });
+                    
+                    // if the CL tool errors
+                    process.stderr.on("end",function(chunk){
+                        //stitch together the error and display it
+                        var full_error=error_accumulation.join('');
                         draw_error(e);
+                        console.log("error in style50:");
+                        console.log(full_error);
                         return;
                     });
                     
-                    //if the CL tool works
-                    process.stdout.on("data", function(chunk) {
+                    // if the CL tool works
+                    process.stdout.on("end", function(chunk) {
+                        
+                        //stitch the various chunks together
+                        var full_output=out_accumulation.join('');
                         
                         //unpack the JSON output
-                        var style50_dict = JSON.parse(chunk);
+                        var style50_dict = JSON.parse(full_output);
                         if (!style50_dict[filepath]){
                             draw_error(e);
                             return;
