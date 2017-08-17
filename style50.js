@@ -223,7 +223,12 @@ define(function(require, exports, module) {
                 return;
             }
             
-            var fullpath = "/home/ubuntu/workspace" + filepath;
+            var fullpath;
+            if (filepath[0]==='/'){
+                fullpath = "/home/ubuntu/workspace" + filepath;
+            }else{
+                fullpath = "/home/ubuntu/"+filepath.substring(2);
+            }
             
             var extention = filepath.split('.').pop();
             if (extention !== "c" && extention !== "js" && extention !== "py" && extention !== "cpp" && extention !== "java"){

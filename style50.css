@@ -2,12 +2,9 @@ del {background-color: OrangeRed;  text-decoration: none;}
 ins {background-color: SpringGreen; text-decoration: none;}
 
 style50 {
-    font-family:" + font_family + ";
+    overflow-y: scroll;
+    height: 100%;
     font-size: 13;
-}
-            
-style50 {
-    overflow-y: scroll; height: 100%;
     user-select: none;
     -ms-user-select: none;
     -moz-user-select: none;
