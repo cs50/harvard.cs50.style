@@ -19,6 +19,8 @@ define(function(require, exports, module) {
         var RUNTIME_ERR_MSG = "Style50 returned an error message";
         var UNSUPPORTED_ERR_MSG = "Style50 does not support this file type";
         
+        var path = require("path");
+        
         /***** Initialization *****/
         var style50_panel = new Panel("style50", main.consumes, {
             index    : 100, // order in the vertical bar
@@ -225,13 +227,13 @@ define(function(require, exports, module) {
             
             var fullpath;
             if (filepath[0]==='/'){
-                fullpath = "/home/ubuntu/workspace" + filepath;
+                fullpath = path.join("/home/ubuntu/workspace", filepath);
             }else{
-                fullpath = "/home/ubuntu/"+filepath.substring(2);
+                fullpath = path.join("/home/ubuntu/", filepath.substring(2));
             }
             
-            var extention = filepath.split('.').pop();
-            if (extention !== "c" && extention !== "js" && extention !== "py" && extention !== "cpp" && extention !== "java"){
+            var extention = path.extname(fullpath);
+            if (extention !== ".c" && extention !== ".js" && extention !== ".py" && extention !== ".cpp" && extention !== ".java"){
                 html_error(e, UNSUPPORTED_ERR_MSG);
                 return;
             }
