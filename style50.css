@@ -1,7 +1,7 @@
 del {background-color: OrangeRed;  text-decoration: none;}
 ins {background-color: SpringGreen; text-decoration: none;}
 
-style50 {
+#style50 {
     overflow-y: scroll;
     height: 100%;
     font-size: 13;
