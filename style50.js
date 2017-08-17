@@ -1,6 +1,6 @@
 define(function(require, exports, module) {
     main.consumes = [
-        "Panel","proc","save","settings","tabManager","ui"
+        "dialog.error","Panel","proc","save","settings","tabManager","ui"
     ];
     main.provides = ["harvard.cs50.style"];
     return main;
@@ -12,6 +12,12 @@ define(function(require, exports, module) {
         var settings = imports.settings;
         var tabManager = imports.tabManager;
         var ui = imports.ui;
+        
+        var BAD_RESULT_MSG = "Style50 returned something unexpected";
+        var CRASH_ERR_MSG = "Style50 crashed";
+        var NO_RESULT_MSG = "Style50 didn't return a result";
+        var RUNTIME_ERR_MSG = "Style50 returned an error message";
+        var UNSUPPORTED_ERR_MSG = "Style50 does not support this file type";
         
         /***** Initialization *****/
         var style50_panel = new Panel("style50", main.consumes, {
@@ -83,7 +89,10 @@ define(function(require, exports, module) {
                 "style50",
                 { args: ["-o","json", filepath] },  //runs in /var/c9sdk
                 function(err, process) {
-                    if (err) throw err;
+                    if (err){
+                        grave_error(e, CRASH_ERR_MSG);
+                        throw err;
+                    }
                     
                     var error_accumulation=[];
                     var out_accumulation=[];
@@ -99,12 +108,16 @@ define(function(require, exports, module) {
                     
                     // if the CL tool errors
                     process.stderr.on("end",function(chunk){
+                        
                         //stitch together the error and display it
                         var full_error=error_accumulation.join('');
-                        draw_error(e);
-                        console.log("error in style50:");
-                        console.log(full_error);
-                        return;
+                        
+                        if (full_error){
+                            grave_error(e, RUNTIME_ERR_MSG);
+                            console.log("error in style50:");
+                            console.log(full_error);
+                            return;
+                        }
                     });
                     
                     // if the CL tool works
@@ -113,17 +126,35 @@ define(function(require, exports, module) {
                         //stitch the various chunks together
                         var full_output=out_accumulation.join('');
                         
-                        //unpack the JSON output
-                        var style50_dict = JSON.parse(full_output);
-                        if (!style50_dict[filepath]){
-                            draw_error(e);
+                        if (!full_output){
+                            grave_error(e, NO_RESULT_MSG);
                             return;
                         }
                         
+                        // bad output
+                        var style50_dict = JSON.parse(full_output);
+                        if (!style50_dict[filepath]){
+                            grave_error(e, BAD_RESULT_MSG);
+                            return;
+                        }
+                        
+                        // handled internal error (e.g. couldn't find file)
+                        var error_msg = style50_dict[filepath].error;
+                        if (error_msg){
+                            html_error(e,"Style50: " + error_msg);
+                            return;
+                        }
+                        
+                        // missing fields
                         var diff_html = style50_dict[filepath].diff;
                         var percent_score = style50_dict[filepath].score;
+                        if (!diff_html || ! percent_score){
+                            html_error(e, BAD_RESULT_MSG);
+                        }
                         
-                        //if code style is perfect, congratualte the user and quit
+                        // process results
+                        
+                        // if code style is perfect, congratualte the user and quit
                         if (percent_score === 1){
                             e.html.innerHTML = "<div id = 'style50_perfect'>" + "<br>" + "Your code is styled beautifully!!" + "</div>";
                             return;
@@ -145,13 +176,17 @@ define(function(require, exports, module) {
             );
         };
         
-        //helpers to diplay an error message
-        draw_unsupported_error = function(e){
-            e.html.innerHTML = "<div id = 'style50_error'>" + "Style50 does not support this file type" + "</div>";
-        };
-        draw_error = function(e){
-            e.html.innerHTML = "<div id = 'style50_error'>" + "Style50 encountered an error" + "</div>";
-        };
+        //helper to diplay an error message in the panel
+        function html_error(e, message){
+            e.html.innerHTML = "<div id = 'style50_error'>" + message + "</div>";
+        }
+        
+        //helper to diplay a (serious) error message as a pop-in
+        function grave_error(e, message){
+            var showError = imports["dialog.error"].show;
+            html_error(e, message);
+            return showError(message,3000);
+        }
         
         /***** Lifecycle *****/
         //load and unload
@@ -192,7 +227,7 @@ define(function(require, exports, module) {
             
             var extention = filepath.split('.').pop();
             if (extention !== "c" && extention !== "js" && extention !== "py" && extention !== "cpp" && extention !== "java"){
-                draw_unsupported_error(e);
+                html_error(e, UNSUPPORTED_ERR_MSG);
                 return;
             }
             
