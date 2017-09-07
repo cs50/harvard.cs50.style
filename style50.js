@@ -21,6 +21,8 @@ define(function(require, exports, module) {
         
         var path = require("path");
         
+        var lastScrollTop = 0;
+        
         /***** Initialization *****/
         var style50_panel = new Panel("style50", main.consumes, {
             index    : 100, // order in the vertical bar
@@ -80,6 +82,8 @@ define(function(require, exports, module) {
             settings.on("user/ace/@fontFamily", function(new_family_text) {
                 ui.setStyleRule("#style50", "font-family", new_family_text);
             }, style50_panel);
+            
+            
         }
         
         /***** Methods and Helper Functions*****/
@@ -91,8 +95,9 @@ define(function(require, exports, module) {
             
             //run the CLI and handle results
             proc.spawn(
-                "style50",
-                { args: ["-o","json", filepath] },  //runs in /var/c9sdk
+                "style50", {
+                    args: ["-o", "json", filepath]
+                }, //runs in /var/c9sdk
                 function(err, process) {
                     if (err) {
                         grave_error(e, CRASH_ERR_MSG);
@@ -176,6 +181,8 @@ define(function(require, exports, module) {
                         score_html = "<div>You have " + bad_line_count + " lines styled incorrectly";
                         
                         e.html.innerHTML = "<div id = 'style50'>" + score_html + diff_html + "</div>";
+                        
+                        document.getElementById("style50").addEventListener("scroll", scroll_ACE);
                     });
                 }
             );
@@ -192,6 +199,31 @@ define(function(require, exports, module) {
             html_error(e, message);
             return showError(message, 3000);
         }
+        
+        //helper to scroll ACE editor to match style50's position
+        function scroll_ACE(){
+            var style50_pos = document.getElementById("style50").scrollTop;
+            var ace = tabManager.focussedTab.editor;
+            
+            var pix_per_line = 15.2;
+            var top_margin_lines = 2;
+            var lines_on_screen = 25;
+            
+            var topmost_visible_ace_line = Math.round(style50_pos / pix_per_line) + top_margin_lines -1;
+            if (lastScrollTop < style50_pos){
+                //scrolling down, ACE summons the lowest line
+                var ace_bottom_line_num = topmost_visible_ace_line + lines_on_screen;
+                ace.scrollTo(ace_bottom_line_num, 0);
+            }else{
+                //scrolling up, ACE summons the highest line;
+                ace.scrollTo(topmost_visible_ace_line, 0);
+            }
+            lastScrollTop=style50_pos;
+            
+        }
+        
+        //ScrollBarObject.on("scroll", function(e))
+        // scrollTop = e.data
         
         /***** Lifecycle *****/
         //load and unload
