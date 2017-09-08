@@ -202,14 +202,28 @@ define(function(require, exports, module) {
         
         //helper to scroll ACE editor to match style50's position
         function scroll_ACE(){
+            
+            function px2float(str){
+                return Number(str.substring(0, str.length - 2));
+            }
+            
             var style50_pos = document.getElementById("style50").scrollTop;
             var ace = tabManager.focussedTab.editor;
             
-            var pix_per_line = 15.2;
-            var top_margin_lines = 2;
-            var lines_on_screen = 25;
+            // get the number of pixels per line by checking CSS of the editable ACE line
+            var line_element = document.querySelector(".codeditorHolder .ace_text-input");
+            var line_style = getComputedStyle(line_element);
+            var pix_per_line = px2float(line_style.height);
             
-            var topmost_visible_ace_line = Math.round(style50_pos / pix_per_line) + top_margin_lines -1;
+            // hardwired in the HTML.
+            var top_margin_lines = 2;
+            
+            // number of lines on screen
+            var editor_element = document.querySelector(".editor_tab .codeditorHolder");
+            var editor_style = getComputedStyle(editor_element);
+            var lines_on_screen = Math.round(px2float(editor_style.height)/pix_per_line);
+            
+            var topmost_visible_ace_line = Math.round(style50_pos / pix_per_line) + top_margin_lines - 3;
             if (lastScrollTop < style50_pos){
                 //scrolling down, ACE summons the lowest line
                 var ace_bottom_line_num = topmost_visible_ace_line + lines_on_screen;
