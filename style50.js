@@ -224,7 +224,7 @@ define(function(require, exports, module) {
             var ace = tabManager.focussedTab.editor.ace;
             
             // get the number of pixels per line by checking CSS of the editable ACE line
-            var line_element = document.querySelector(".codeditorHolder .ace_text-input");
+            var line_element = document.querySelector(".ace_editor .ace_text-input");
             var line_style = getComputedStyle(line_element);
             var pix_per_line = px2float(line_style.height);
             
