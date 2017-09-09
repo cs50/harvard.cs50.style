@@ -12,17 +12,15 @@ define(function(require, exports, module) {
         var settings = imports.settings;
         var tabManager = imports.tabManager;
         var ui = imports.ui;
-        
+
         var BAD_RESULT_MSG = "Style50 returned something unexpected";
         var CRASH_ERR_MSG = "Style50 crashed";
         var NO_RESULT_MSG = "Style50 didn't return a result";
         var RUNTIME_ERR_MSG = "Style50 returned an error message";
         var UNSUPPORTED_ERR_MSG = "Style50 does not support this file type";
-        
+
         var path = require("path");
-        
-        var lastScrollTop = 0;
-        
+
         /***** Initialization *****/
         var style50_panel = new Panel("style50", main.consumes, {
             index    : 100, // order in the vertical bar
@@ -31,7 +29,7 @@ define(function(require, exports, module) {
             minWidth : 200,  // ?? doesn't seem to be enforced
             where    : "right"
         });
-        
+
         var emit = style50_panel.getEmitter();
         
         //runs when c9 is started/package is loaded
@@ -62,6 +60,21 @@ define(function(require, exports, module) {
                         aml: style50_panel.aml,
                         html: style50_panel.aml.$int
                     });
+                    
+                    // TODO: just overwriting .onScrollTopChange makes the window not scroll anymore
+                    // need to do our new behavior and then the old behavior, but 'this' gets in the way
+                    
+                    //var will = e.tab.editor.ace;
+                    
+                    // lame_behavior = will.onScrollTopChange;
+                    
+                    // cool_behavior = function(){
+                    //     scroll_50();
+                    //     lame_behavior();
+                    // };
+                    
+                    //will.onScrollTopChange = scroll_50;
+                    
                 }, style50_panel);
             });
             
@@ -208,7 +221,7 @@ define(function(require, exports, module) {
             }
             
             var style50_pos = document.getElementById("style50").scrollTop;
-            var ace = tabManager.focussedTab.editor;
+            var ace = tabManager.focussedTab.editor.ace;
             
             // get the number of pixels per line by checking CSS of the editable ACE line
             var line_element = document.querySelector(".codeditorHolder .ace_text-input");
@@ -216,28 +229,18 @@ define(function(require, exports, module) {
             var pix_per_line = px2float(line_style.height);
             
             // hardwired in the HTML.
-            var top_margin_lines = 2;
+            var top_margin_lines = 2 -1; //-1 for zero indexing
             
-            // number of lines on screen
-            var editor_element = document.querySelector(".editor_tab .codeditorHolder");
-            var editor_style = getComputedStyle(editor_element);
-            var lines_on_screen = Math.round(px2float(editor_style.height)/pix_per_line);
-            
-            var topmost_visible_ace_line = Math.round(style50_pos / pix_per_line) + top_margin_lines - 3;
-            if (lastScrollTop < style50_pos){
-                //scrolling down, ACE summons the lowest line
-                var ace_bottom_line_num = topmost_visible_ace_line + lines_on_screen;
-                ace.scrollTo(ace_bottom_line_num, 0);
-            }else{
-                //scrolling up, ACE summons the highest line;
-                ace.scrollTo(topmost_visible_ace_line, 0);
-            }
-            lastScrollTop=style50_pos;
-            
+            var topmost_visible_ace_line = Math.round(style50_pos / pix_per_line) + top_margin_lines;
+            ace.scrollToRow(topmost_visible_ace_line);
         }
         
-        //ScrollBarObject.on("scroll", function(e))
-        // scrollTop = e.data
+        // helper to scroll style50 to match ace's position
+        function scroll_50(){
+            var cur_tab = tabManager.focussedTab;
+            var top_ace_line = cur_tab.editor.ace.getFirstVisibleRow();
+            console.log(top_ace_line)
+        }
         
         /***** Lifecycle *****/
         //load and unload
