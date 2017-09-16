@@ -10,6 +10,8 @@ ins {background-color: SpringGreen; text-decoration: none;}
     -moz-user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+    border-left: solid #999999;
+    padding-left: 10px;
 }
 
 #style50_perfect {
@@ -20,4 +22,5 @@ ins {background-color: SpringGreen; text-decoration: none;}
 #style50_error {
     text-align: center;
     padding: 70px 0;
+    background-color: WhiteSmoke;
 }
